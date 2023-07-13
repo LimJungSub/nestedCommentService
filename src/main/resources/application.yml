@@ -22,7 +22,7 @@ management.endpoints.web.exposure.include : "*" #spring actuator
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/commentservice #??????? url
+    url: jdbc:mysql://localhost:3306/commentservice #commentservice??????? url
     username: root  #fuck 도대체왜 jungsub으로 설정되어있었지? , 워크벤치 드가서보니까 떡하니 루트라고 나와있는데..
     password: wjdtjq12!@ #thisistestpw #wjdtjq12!@인데??                    #실제 개발시에는 절대 이렇게 패스워드를 프로퍼티에 노출시키면 안된다. TODO
     driver-class-name: com.mysql.cj.jdbc.Driver #??? ??? ?????? build.gradle?? ????. mysql?? ??? ?? ???? ?.
