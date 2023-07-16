@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 //@ConfigurationPropertiesScan
 //@EntityScan
 public class commentServiceApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(commentServiceApplication.class, args);
 	}
