@@ -1,11 +1,17 @@
 package com.myfirstspringproject.Config;
 
+import com.myfirstspringproject.Dto.UserAccountPrincipal;
+import com.myfirstspringproject.Repository.userAccountRepository;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -25,5 +31,20 @@ public class SecurityConfig {
                 .formLogin(Customizer.withDefaults())
                 .logout(logout -> logout.logoutSuccessUrl("/")) // vs logout(logout -> logout.logoutSuccessUrl("/comments")) 내가 어떻게 매핑하냐에 따라 다르긴 하겠지
                 .build();   //?
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    // 유저정볼르 찾기위해 repository에서 findBy를 통해 가지고 오는 기본적인 원리
+    @Bean
+    public UserDetailsService userDetailsService(userAccountRepository repository){
+        //람다식으로 이렇게 바로 리턴할수있는 이유? 익명함수같은거랑 관련있을거임
+        //findById 옵셔널로 들어있으니 까주고, 아 까주는건 마지막에 해야하나봐!, map 인자 자체가 옵셔널이 널이아닐떄만 실행되는거네.
+        return username -> repository.findById(Long.valueOf(username))
+                .map(UserAccountPrincipal::deriveFromEntity)
+                .orElseThrow(()->new UsernameNotFoundException("유저정보검색 Error"));
     }
 }
