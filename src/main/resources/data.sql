@@ -1,0 +1,1 @@
+insert into useraccount values("user2", "-", "nickname2", "{noop}password2")

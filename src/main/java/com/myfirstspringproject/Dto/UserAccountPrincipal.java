@@ -15,12 +15,12 @@ import java.util.Set;
 public class UserAccountPrincipal implements UserDetails {
 
     //시큐리티를 활용하는데 adminMemo가 필요할까? 이용제한 등 조치필요하면 그럴수있긴하지.
-    private Long userId;
+    private String userId;
     private String userPassword;
     private String nickName;
     private String adminMemo;
 
-    public UserAccountPrincipal(Long userId, String userPassword, String nickName, String adminMemo) {
+    public UserAccountPrincipal(String userId, String userPassword, String nickName, String adminMemo) {
         this.userId = userId;
         this.userPassword = userPassword;
         this.nickName = nickName;
@@ -37,7 +37,7 @@ public class UserAccountPrincipal implements UserDetails {
     }
 
     public static UserAccountPrincipal of(
-            Long userId, String userPassword, String nickName, String adminMemo)
+            String userId, String userPassword, String nickName, String adminMemo)
     {
         return new UserAccountPrincipal(userId, userPassword, nickName, adminMemo);
     }
@@ -55,7 +55,7 @@ public class UserAccountPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userId.toString();
+        return userId;
     }
 
     @Override
