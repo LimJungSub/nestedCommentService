@@ -1,0 +1,25 @@
+/*.container{*/
+/*    display: grid;*/
+/*    grid-template-columns: repeat(6, 110px);*/
+/*    grid-template-rows: repeat(3, 30px);*/
+/*}*/
+
+/*.text-area{*/
+/*    grid-column: 1/6;*/
+/*    grid-row: 1/4;*/
+/*}*/
+
+/*.select-label{*/
+/*    grid-column: 6/7; !* 6/7 ? 7? *!*/
+/*    grid-row: 1/2;*/
+/*}*/
+
+/*.select-box{*/
+/*    grid-column: 6/7;*/
+/*    grid-row: 2/3;*/
+/*}*/
+
+/*.save-button{*/
+/*    grid-column: 7;*/
+/*    grid-row: 3/4;*/
+/*}*/

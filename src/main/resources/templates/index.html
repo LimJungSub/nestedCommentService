@@ -1,24 +1,80 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap demo - main</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!--    <link rel="stylesheet" href="comments.css">-->
+    <style>
+        li{
+            list-style-type: none;  /*점 없애기*/
+        }
+    </style>
 </head>
-
 <header th:replace="header::header"/>
 
 <body>
-index.html입니다. 이 페이지는, 나중에 달린 댓글들을 먼저 보여줄 것입니다.
+<!--폼 안에 placeholder로 '댓글 작성'문구 넣기, 레이블은 hidden 처리-->
+<!--밑에 두 줄이 다른 이유가 뭘까? 첫번쨰는 푸터가 정상적으로 중앙에 있고 후자는 푸터가 움직임; 왼쪽으로 ㅅㅂ-->
+<!--<label for="commentSave"/>-->
 
+<!--로그인 성공했으면, 유저 받아와서 헤더와 댓글목록 사이에 자기아이디 띄우주면 될듯.-->
+        <ul style="text-align: center" >
+<!--                만약 commentList가 비어있을때는?-->
+            <li th:if="${commentList.isEmpty()}">게시글이 없습니다.</li>
+            <li th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}">
+                <div class="row">
+<!--                    todo:닉네임으로 변경 희망 (createdBy는 아이디)-->
+                    <span class="col created-by" th:text="${comment.createdBy()}"/>
+<!--                    조건부 표현식 익히기-->
+                    <span class="col created-date" th:text="(${comment.createdDate()} != ${comment.modifiedDate()}) ?
+                        ${comment.modifiedDate()}:${comment.createdDate()}"/>
+<!--                    todo: 조건에 따라 css를 다르게 하기-->
+<!--                    지금 로그인 한 유저를 가지고 와서, 작성자 아이디(닉네임)과 비교-->
+<!--                    지금 로그인한 유저를 갖고온다...? 막막하지? 원노트 [타임리프-스프링시큐리티] 참고-->
+<!--                    만약 로그인 안한 상태에서 본다면 ${#authentication.name}가 없으니까 unless쪽 타지 않을까?-->
+<!--                    todo: 위 todo도 충분히 연습해볼만 함. 근데 그냥 수정,삭제버튼이 없는게 보기 더 깔끔할듯.-->
+                    <button th:if="${#authentication.name}==${comment.createdBy()}" class="col modify-btn" th:text="수정"/>
+                    <span th:if="${#authentication.name}!=${comment.createdBy()}" class="col modify-btn"/>
+                    <button th:if="${#authentication.name}==${comment.createdBy()}" class="col delete-btn" th:text="삭제"/>
+                    <span th:if="${#authentication.name}!=${comment.createdBy()}" class="col delete-btn"/>
+                </div>
+                <div class="row" style="border: black" th:text="${comment.content()}"></div>
+            </li>
+        </ul>
+
+<!--페이지네이션 바-->
+
+
+<div style="text-align: center;">
+    <form method="post" action="#" id="commentSave">
+        <!--https://velog.io/@solmii/TIL-HTML%EC%9D%98-input-textarea-15hm8sqe -->
+        <!--줄바꿈 속성 필요-->
+        <input type="text" placeholder="댓글 입력..." style="width: 55%; height: 30px"/>
+        <!--textarea는 />로 쓰면 에러나네;;-->
+        <!--label에다가 css 적용하면 select에게까지 전달되나?-->
+        <label for="cascadeOptionSelect" style="font-size: smaller"><strong>부모댓글 삭제 시 자동삭제</strong>
+            </label>
+        <select name="cascadeOptionSelect" id="cascadeOptionSelect" style="margin-right: 10px">
+            <option value="true">삭제</option>
+            <option value="false">이 댓글 남김</option>
+        </select>
+        <button type="submit" class="btn btn-primary row" onclick="location.href='#'">등록</button>
+    </form>
+    <label for="commentSave"></label>
+</div>
+<!--</label>-->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
-
 </body>
 
 <footer th:replace="footer::footer"/>
 
 </html>
+
+
+
+

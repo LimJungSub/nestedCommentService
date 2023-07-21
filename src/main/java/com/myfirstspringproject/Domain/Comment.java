@@ -57,8 +57,9 @@ public class Comment {
     @Getter
     //@Setter 필요X 자동생성 들어가잖아. 마찬가지로 외부접근도 허용할 필요가 없으니 필드들 private로 놓자 (혹시 몰라 protected로 둚) -> 근데 차피 Comment단에서 private로 처리하긴했는데.. 이너클래스 사용시 어쨰되는지 모르곘으니 나중에 공부
     //AuditingFields는 엔티티로 설정을 해야할까? 아닐거 같은데. 엔티티로 설정하면 스키마가 따로 만들어지는거 아닌가?
+    //AuditingFields는 CommentDto에서 .getAuditingFields까지는 에러가 안나는데 .getCreatedBy 등이 접근불가에러가 나서 public으로 변경함.
     @EntityListeners(AuditingEntityListener.class)
-    protected class AuditingFields{
+    public class AuditingFields{
         @CreatedDate
         @Column(nullable = false, updatable = false) @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME)
         private LocalDateTime createdDate;

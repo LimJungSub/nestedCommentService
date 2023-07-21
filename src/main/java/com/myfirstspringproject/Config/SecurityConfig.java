@@ -1,7 +1,7 @@
 package com.myfirstspringproject.Config;
 
 import com.myfirstspringproject.Dto.UserAccountPrincipal;
-import com.myfirstspringproject.Repository.userAccountRepository;
+import com.myfirstspringproject.Repository.UserAccountRepository;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +40,7 @@ public class SecurityConfig {
 
     // 유저정볼르 찾기위해 repository에서 findBy를 통해 가지고 오는 기본적인 원리
     @Bean
-    public UserDetailsService userDetailsService(userAccountRepository repository){
+    public UserDetailsService userDetailsService(UserAccountRepository repository){
         //람다식으로 이렇게 바로 리턴할수있는 이유? 익명함수같은거랑 관련있을거임
         //findById 옵셔널로 들어있으니 까주고, 아 까주는건 마지막에 해야하나봐!, map 인자 자체가 옵셔널이 널이아닐떄만 실행되는거네.
         //findById는 파라미터로 Long을 받는다. 근데 userId가 Long이 아니라 String인 상황. 그냥 하나 커스텀해서 만드는게 쉽긴한데, 정말 findById는 Long만 받을수있나

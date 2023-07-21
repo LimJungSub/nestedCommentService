@@ -7,6 +7,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import java.util.Optional;
 
 @RepositoryRestResource
-public interface userAccountRepository extends JpaRepository<UserAccount,Long> {
+public interface UserAccountRepository extends JpaRepository<UserAccount,Long> {
     public Optional<UserAccount> findByUserId(String userId);
 }
