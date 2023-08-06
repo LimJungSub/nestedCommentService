@@ -1,6 +1,8 @@
 package com.myfirstspringproject.Dto;
 
 import com.myfirstspringproject.Domain.Comment;
+import com.myfirstspringproject.Domain.UserAccount;
+import com.myfirstspringproject.Repository.UserAccountRepository;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -12,24 +14,39 @@ public record CommentDto(
         String content,
         Boolean isAffected,
         String userId,
-        Long parentId,
-        Set<Comment> childComments,
+//        Long parentId,
+//        Set<Comment> childComments,
         LocalDateTime createdDate,
         LocalDateTime modifiedDate,
         String createdBy
 ) {
-    public static CommentDto of(Long id, String content, Boolean isAffected, String userId, Long parentId, Set<Comment> childComments, LocalDateTime createdDate, LocalDateTime modifiedDate, String createdBy) {
-        return new CommentDto(id,content,isAffected,userId,parentId,childComments,createdDate,modifiedDate,createdBy);
+    //Long parentId, Set<Comment> childComments,
+    public static CommentDto of(Long id, String content, Boolean isAffected, String userId,  LocalDateTime createdDate, LocalDateTime modifiedDate, String createdBy) {
+        return new CommentDto(id,content,isAffected,userId,createdDate,modifiedDate,createdBy);
     }
-    
+
     //엔티티로 부터 dto
     public static CommentDto toDto(Comment comment){
         return new CommentDto(
                 //comment.getUserId().getUserId() 불편 ... -> 엔티티에서 userId가 UserAccount로 설정되어있었네... 어떻게 리팩토링할까? 이대로써도되긴함.
-                comment.getId(), comment.getContent(), comment.getIsAffected(), comment.getUserId().getUserId(), comment.getParentId(),
-                comment.getChildComments(), comment.getAuditingFields().getCreatedDate(), comment.getAuditingFields().getModifiedDate(),
-                comment.getAuditingFields().getCreatedBy()
+                comment.getId(), comment.getContent(), comment.getIsAffected(), comment.getUser().getUserId(), comment.getCreatedDate(), comment.getModifiedDate(),
+                comment.getCreatedBy()
+                // comment.getParentId(),
+                //                comment.getChildComments(),
         );
     }
 
+
+    //디티오로부터 엔티티, 디티오가있은 후 엔티티로 변하니 스태틱메소드 X
+//    public Comment toEntity(String content, Boolean isAffected, UserAccount user){
+//        //id, auditingfield는 여기서 안받아도 될거고
+//        //userId, content, isAffected는 여기서 받아야됨.
+//        //childComments, parentId는 나중에 세팅하는 과정 거치면 될 듯?
+//
+//        //UserAccount findByUserId
+//
+//        //엔티티에 위 인자들을 그대로 받는 생성자 및 팩토리메소드of 생성
+//        return Comment.of();
+//
+//    }
 }

@@ -11,7 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 //필요 시 record로 변경해도 되긴 함
-@Getter
 public class UserAccountPrincipal implements UserDetails {
 
     //시큐리티를 활용하는데 adminMemo가 필요할까? 이용제한 등 조치필요하면 그럴수있긴하지.

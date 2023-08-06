@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,9 +22,14 @@
         <ul class="nav nav-pills">
 <!--            사실 여기 a태그로 하는게 좋긴한데... 버튼을 가져오다보니;-->
 <!--            location.href vs a href https://okky.kr/questions/304141   후자를 쓰는게 일반적으로 좋을거같긴한데... 음 -->
-            <li class="nav-item"><button type="button" class="btn btn-primary" style="margin-right: 7px"
-                                         onclick="location.href='/login'">로그인</button></li>
-            <li class="nav-item"><button type="button" class="btn btn-primary" onclick="location.href='/logout'">로그아웃</button></li>
+            <li class="nav-item">
+                <button sec:authorize="!isAuthenticated()" type="button" class="btn btn-primary" style="margin-right: 7px"
+                                         onclick="location.href='/login'">로그인</button>
+                <span sec:authorize="isAuthenticated()" th:text="${#authentication.getName()}+'님'" style="margin-right: 10px; display: flex"/>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="btn btn-primary" onclick="location.href='/logout'">로그아웃</button>
+            </li>
         </ul>
     </header>
 </div>

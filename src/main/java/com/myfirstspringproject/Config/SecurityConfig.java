@@ -25,11 +25,13 @@ public class SecurityConfig {
                 .permitAll()
                 .requestMatchers(HttpMethod.GET, "/comments", "/")  //mvcMatchers deprecated : 원노트에 기록함 //여기 적혀있는 경로는 컨트롤러 매핑경로인듯. /comments 매핑하는 컨트롤러 지정안한상태로 요청 넣으면 로그인페이지 뜸 (이외 경로로 잡히니까)
                 .permitAll()
-                .anyRequest().authenticated()
-        )   //여기까진 알겠는데, 이후 왜 formLogin이 적힐까? authorizeHttpRequests()가 HttpSecurity를 리턴하는 것은 확인했음. HttpSecurity에 직접적으로 formLogin이 적힐수있는건거같은데.
+                .anyRequest().authenticated()       //0724 그렇다면, 인증이 되었을때 요청하는 페이지에 대해서는? 또 There was an unexpected error (type=Forbidden, status=403). There was an unexpected error (type=Method Not Allowed, status=405).
+
+                )   //여기까진 알겠는데, 이후 왜 formLogin이 적힐까? authorizeHttpRequests()가 HttpSecurity를 리턴하는 것은 확인했음. HttpSecurity에 직접적으로 formLogin이 적힐수있는건거같은데.
             //아마 permitAll들 제외하고, 이외 남겨놓은 authenticated()대상인 애들에 대해서만 formLogin이 적용되는 것같다.
                 .formLogin(Customizer.withDefaults())
                 .logout(logout -> logout.logoutSuccessUrl("/")) // vs logout(logout -> logout.logoutSuccessUrl("/comments")) 내가 어떻게 매핑하냐에 따라 다르긴 하겠지
+                .csrf().disable()   //이걸로 포스트요청 못잡는 것은 해결된듯.
                 .build();   //todo: 로그아웃은 나중에 로그아웃 alert창띄워서 확인하는 방법으로 변경할 것. 지금은 스프링 기본제공 로그아웃확인창 사용 중.
     }
 
@@ -49,3 +51,4 @@ public class SecurityConfig {
                 .orElseThrow(()->new UsernameNotFoundException("유저정보검색 Error"));
     }
 }
+

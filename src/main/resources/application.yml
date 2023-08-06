@@ -29,7 +29,7 @@ spring:
   jpa:
     defer-datasource-initialization: true #resources? sql?? ??? ??? ?????? ??? ???? ???. -> data.sql ??
     hibernate:
-      ddl-auto: create #ddl, 즉 스프링부트와 JPA가 연동해 자동으로 테이블을 만들어준다.
+      ddl-auto: update #ddl, 즉 스프링부트와 JPA가 연동해 자동으로 테이블을 만들어준다.
     show-sql: true #sql?? ???
     properties: #properties? ?? ?????. ?? ??????? ???????
       hibernate: #spring data jpa? ???? hibernate ???
@@ -49,8 +49,8 @@ spring:
     #위 cache=false 설정은 이미 생성된 결과를 서버에서 계속 보관할 것인지에 대한 설정입니다.
     #Thymeleaf 파일을 수정하고 저장한 후 브라우저에서 변경된 결과를 확인하기 위한 설정입니다.
     #정적 파일 서버 재시작 없이 바로보는 위 이후 설정법은 https://kmhan.tistory.com/564 참고 ;
-
-
+  mvc:
+    log-request-details: true #parameters={masked} 해제
 
 
 
