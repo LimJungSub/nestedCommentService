@@ -5,7 +5,7 @@
 
 
 # 사용기술
-spring boot 3.0.6
+spring boot 3.0.6 - mvc방식 위주 개발
 
 
 thymeleaf3
