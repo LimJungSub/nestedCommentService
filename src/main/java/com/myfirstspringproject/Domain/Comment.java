@@ -14,8 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -31,7 +30,9 @@ public class Comment extends AuditingFields{
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
+    //@Column(nullable = false) 부모댓글인 경우 nullable가능하므로 수정
+    //자식 댓글의 경우 필수로 가져야하는 값이지만 프론트쪽에서 처리하므로써 null 방지 //내가 @Column 속성을 뺴버려서 그랬나.
+    @Column(nullable = true)
     private Boolean isAffected;
 
     //jpa에서 fk를 나타낼떈 이 어노테이션 사용?
@@ -40,8 +41,11 @@ public class Comment extends AuditingFields{
     //로그인은 안해도되는데... 이렇다면 createdBy, modifiedBy는 어떻게 설정해야할까?
 
     //자기 자신 참조 //여기가 Long이 아니라 Comment 였으면 뭐라고? 양방향매핑 (강의참고)
-    @Column
+    @Column(nullable = true)
     private Long parentId;
+
+    @Column(nullable = true)
+    private String parentComment_Writer;
 
 //    대댓글리스트, 댓글하나당 여러 대댓글 있으니 대댓글입장에서 1ㄷ1 매칭? ㄴㄴ
 //    컬렉션을 디비는 나타낼 수 없으니 컬렉션은 '다'의 관점으로 보자, 외래키는? 부모댓글id. 주인은 comment
@@ -49,20 +53,35 @@ public class Comment extends AuditingFields{
     @ToString.Exclude
     @Column(nullable = true)
     @OrderBy("createdDate asc")
-    @OneToMany(mappedBy="parentId", cascade = CascadeType.PERSIST) //, cascade = CascadeType.DETACH
-    private Set<Comment> childComments;
+    @OneToMany(mappedBy="parentId") //, cascade = CascadeType.DETACH
+    private Set<Comment> childComments = new LinkedHashSet<>(); //순서유지?
 
 //    @Embedded
 //    public AuditingFields auditingFields;
 
-    public Comment(String content, Boolean isAffected, UserAccount user) {
+    public Comment(String content, Boolean isAffected, UserAccount user, Long parentId, String parentComment_Writer) {
         this.content = content;
         this.isAffected = isAffected;
         this.user = user;
+        this.parentId = parentId;
+        this.parentComment_Writer = parentComment_Writer;
     }
 
-    public static Comment of(String content, Boolean isAffected, UserAccount user) {
-        return new Comment(content, isAffected, user);
+    //서비스에서 saveComment라는 API를 공통으로 사용하다 보니 여기서 이렇게 Optional떡칠을 하게됐다... API분리 하는 방안도 고려
+    public static Comment of(String content, Optional<Boolean> isAffected, UserAccount user, Optional<Long> parentId, String parentComment_Writer) {
+        if(parentId.isPresent() && !isAffected.isPresent()) {
+            return new Comment(content, null, user, parentId.get(), parentComment_Writer);
+        }
+        else if(!parentId.isPresent() && !isAffected.isPresent()){
+            return new Comment(content, null, user, null, null);
+        }
+        else if(parentId.isPresent() && isAffected.isPresent()){
+            return new Comment(content, isAffected.get(), user, parentId.get(), parentComment_Writer);
+        }
+        else if(!parentId.isPresent() && isAffected.isPresent()){
+            return new Comment(content, isAffected.get(), user, null, null);
+        }
+        return null;
     }
 
     @Override
@@ -80,6 +99,19 @@ public class Comment extends AuditingFields{
         //위 같이 빠진요소들 나중에 다시 넣어주기
     }
 
+    public void addChildComment(Comment childComment){
+        this.childComments.add(childComment);
+        childComment.setParentId(this.id);
+    }
+
+    //DTO말고 여기선언된 함수들은 서비스쪽에서 DTO로 변환과정 거치기 전 테스트할 데이터들 대상
+    public static boolean hasParent(Comment comment){
+        return comment.getParentId()==null?false:true;
+    }
+
+    public static  boolean hasChild(Comment comment){
+        return comment.getChildComments().size()!=0;
+    }
 //    @Embeddable
 //    @ToString
 //    @Getter

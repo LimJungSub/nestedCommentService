@@ -30,11 +30,18 @@ import java.util.Optional;
 @Slf4j
 public class CommentsController {
 
+    //컨트롤러에서 리포지토리 의존성가진다안가진다? X
     @Autowired
     private CommentService commentService;
 
     @Autowired
     private PaginationBarService paginationBarService;
+
+
+    @GetMapping("/test")
+    public String testing(){
+        return "/minitest2";
+    }
 
 
     //강의에서는 검색후 데이터를 뿌려주는 거 및 그냥 데이터를 뿌려주는 것을 이 컨트롤러 하나로 다 구현했었다. 하지만 나는 검색기능을 구현 안한다.
@@ -43,29 +50,59 @@ public class CommentsController {
     public String comments(
             //자바 파일내에서 jpa쓸 떄 엔티티이름을 실제 db에 있는 명으로 해야하나? 아니면 엔티티클래스에 정의된 이름으로 해야하나? ... 아마 당연히 후자이긴 할듯.
             //sort는 어떤 엔티티의 createdDate인지 어떻게 알까? 아마 findAll(Pageable pageable) 구현되어있는 놈으로 알아서 찾나?
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.ASC) Pageable pageable,
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
             //@Embedded 방식으로 하면 createdDate말고 AuditingFields.createdDate라고 지정해주어야한다. //지금 다시 맵드슈퍼클래스로 바꿨ㅇ니 AuditingFields.삭제함.
             //아니 설마 Comment.auditingFields.createdDate인가;
             //음 이렇게 sort=createdDate하면 엔티티쪽정렬구현 필요없이 알아서 갖고와주는거아니였나?
             ModelMap modelMap
     )
     {
-        //서비스에서 다 dto로 바꿔서 컨트롤러에게 줌
-        Page<CommentDto> list = commentService.getComments(pageable);
+        //서비스에서 다 dto로 바꿔서 컨트롤러에게 줌Root
+        Page<CommentDto> list = commentService.getRootComments(pageable);
         List<Integer> paginationBar = paginationBarService.returnNavList(pageable.getPageNumber(), pageable.getPageSize());
         modelMap.addAttribute("paginationBar",paginationBar);
         modelMap.addAttribute("commentList",list);
+        //자식댓글도 담아서 내보내주자. 자식댓글들은 부모아이디를 달고있으므로 이 리스트만 내려줘도 ㄱㅊ
+        //아니다 list에 이미 대댓글까지 포함되어있는데, 자식이 가지고있는지 유무를 프론트에서 판단해야할듯.
+        //그냥 전체 div에 comment를 꺼내고있으므로 변수로 접근하면 됨 조건은 필요 X 없으면 그냥 무출력
+        //다만 생각해야할 것은 대댓글은 정렬방법이 다르기때문에 별도의 리스트를 서버쪽에서 내려주어야할려나...
+//        return "/index";
         return "/index";
     }
 
-//    ArticleRequest articleRequest vs ArticleDto 어떻게 사용했을까?
-    @PostMapping("/save")
+    //루트댓글, 자식댓글 하나씩 출력해봄으로써 엔티티가 정상적으로 구현되었는지 확인하는 컨트롤러메서드
+    //리턴할건 없고, 단순히 콘솔에만 찍어본다.
+    @GetMapping("/getTestData")
+    public void getSomeComments(){
+        //todo AuditingFields쪽만 toString 처리가 되어있는 듯 웬만하면 엔티티 전체에도 toString 적용하자.
+        commentService.getSomeCommentsEntity().stream().forEach(
+                c-> log.info("엔티티 개별 출력 - 자식1802의 getChildComments() : "+c.getChildComments())
+                //1번에대한 대댓글1
+                //1번에대한 대댓글2 / 남김   => 즉 1702(루트)의 자식만 출력됐고, 1802(자식)의 자식은 출력이 안됐음.
+        );
+    }
+
+    //일반 댓글 save
+    @PostMapping( "/save")
     public String saveComment(
+            @RequestParam String content,
+            @AuthenticationPrincipal UserAccountPrincipal principal
+        )
+    {
+        commentService.saveComment(content, Optional.empty(), principal.getUsername(), Optional.empty());
+        return "redirect:/";
+    }
+
+    //대댓글 save
+    //  ArticleRequest articleRequest vs ArticleDto 어떻게 사용했을까? {"/save",
+    @PostMapping( "/save/{parentCommentId}")
+    public String saveChildComment(
             //들어오는 정보가 comment_content뿐이므로, 굳이 ModelAttribute로 받을 필욘 없을 것 같다.
             @RequestParam String content,
-            @RequestParam Boolean isAffected,
+            @RequestParam String isAffected,
             @AuthenticationPrincipal UserAccountPrincipal principal,
-            @Autowired UserAccountRepository userAccountRepository
+//            @Autowired UserAccountRepository userAccountRepository,
+            @PathVariable(required = false) String parentCommentId
         )
     {
         //인증정보를 받아서 UserAccount 형으로 변환, 서비스로 넘겨주기
@@ -78,7 +115,15 @@ public class CommentsController {
         //서비스에서 엔티티로 변환하여 리포지토리로 넣어주는 기존방식으로 구현해보자.
 
         // /save로 매핑 후, redirection을 통해 /로 이동해야 자연스럽게 구현됨
-        commentService.saveComment(content, isAffected, principal.getUsername());
+//        if(parentCommentId.isBlank()) {
+//            commentService.saveComment(content, isAffected, principal.getUsername(), null);
+//        }
+//        else {
+//            commentService.saveComment(content, isAffected, principal.getUsername(), Long.parseLong(parentCommentId));
+//        }
+        //todo 옵셔널로 넘겨줄떄, 받을떄 헷갈리지 않기
+        commentService.saveComment(content, Optional.of(isAffected.equals("1") ? true : false), principal.getUsername(), Optional
+                .ofNullable(Long.parseLong(parentCommentId)));
         return "redirect:/";
     }
 
@@ -144,8 +189,7 @@ public class CommentsController {
             @AuthenticationPrincipal UserAccountPrincipal principal,
             @PathVariable Long commentId,
             @RequestParam String updatingContent,
-            @RequestParam Boolean updatingIsAffected,
-            ModelMap model
+            @RequestParam(required = false) Boolean updatingIsAffected
     ){
         commentService.updateComment(commentId, updatingContent, updatingIsAffected);
         return "redirect:/";

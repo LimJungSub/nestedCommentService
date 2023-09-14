@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Optional;
 
 @Configuration
+@EnableJpaAuditing //위치? 설정파일이라는데
 public class JpaConfig {
 
     // todo(V) auditing 성공하게 수정 - ~By 오디팅 정보를 넣어주기 위함

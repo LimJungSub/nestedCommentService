@@ -9,12 +9,29 @@
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <!--    <link rel="stylesheet" href="comments.css">-->
     <style>
-        .form-container {
-            display: flex;
-            align-items: center;
-            gap: 5px; /* 각 요소 사이의 간격 설정 (선택적) */
+        /*.form-container {*/
+        /*    display: flex;*/
+        /*    align-items: center;*/
+        /*    gap: 5px; !* 각 요소 사이의 간격 설정 (선택적) *!*/
+        /*}*/
+        summary {
+            color: darkblue;
+            font-weight: bolder;
+            font-size: smaller;
+        }
+
+        summary::marker {
+            content: "+ ";
+            font-family: Garamond;
+            color: darkblue;
+        }
+
+        details[open] summary::marker {
+            content: "- ";
+            color: darkblue;
         }
     </style>
+    <!--    <script src="script/main.js"></script>-->
 </head>
 <!--<header th:replace="header::header"/>-->
 
@@ -27,6 +44,8 @@
 <!-- Comments section-->
 <section class="mb-5">
     <div class="card bg-gradient">
+
+
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom bg-light">
             <a href="/"
                class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
@@ -54,10 +73,12 @@
                 </li>
             </ul>
         </header>
+
+
         <div class="card-body">
             <!-- Comment with nested comments-->
             <div th:if="${commentList.isEmpty()}">게시글이 없습니다.</div>
-            <div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-4">
+            <div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-1"> <!--mb4 뺌, b는 bottom이니 바텀에 여백있었음-->
                 <!-- Parent comment-->
                 <div class="flex-shrink-0"><img class="rounded-circle"
                                                 src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..."/></div>
@@ -65,9 +86,10 @@
                     <!--                    <div class="fw-bold" >Commenter Name</div>-->
                     <span class="fw-bold" th:text="${comment.createdBy()}" style="padding-right: 15px"></span>
                     <span style="text-align: right;">
-                        <span th:text="(${comment.createdDate()} != ${comment.modifiedDate()}) ?
-                        ${comment.modifiedDate()}:${comment.createdDate()}"
-                              style="font-size: small; padding-right: 500px"></span>
+                        <span th:text="'수정일: '+${#temporals.format(comment.modifiedDate(), 'yyyy-MM-dd HH:mm:ss')}"
+                              style="font-size: small; padding-right: 25px"></span>
+                        <span th:text="'생성일: '+${#temporals.format(comment.createdDate(), 'yyyy-MM-dd HH:mm:ss')}"
+                              style="font-size: small; padding-right: 400px"></span>
                         <!--                         <div class="form-container">-->
                         <!--                             최신: javascript fetch api를 사용해 데이터를 전송했으므로 form태그의 submit으로 굳이 전달할 필요가 없다.-->
                         <!--                             th:action="'/'+${comment.id()}+'/update'" method="post" id="updateForm"-->
@@ -75,7 +97,7 @@
                         <!--                                <form action="/passwordValidationForUpdate" method="get">-->
                                     <button th:if="${#authentication.name}==${comment.createdBy()}"
                                             class="btn btn-outline-primary btn-sm" style="font-size: small"
-                                            onclick="getUpdateForm()">수정</button>
+                                            th:onclick="getUpdateForm(1, [[${comment.id()}]])">수정</button>
                         <!--                                    <input type="hidden" id="updatePasswordInput" name="password">-->
                         <!--                                </form>-->
                         <!--                                <form th:action="'/'+${comment.id()}+'/delete'" method="post" id="deleteForm">-->
@@ -92,59 +114,188 @@
                         <!--                         </div>-->
                     </span>
                     <!--업데이트시에는 자바스크립트로 아래 태그 hidden 처리 할 것.-->
-                    <div th:text="${comment.content()}" id="viewContent"></div>
+                    <div th:text="${comment.content()}" th:id="'viewContent-'+${comment.id()}"></div>
                     <!--아래태그는 자바스크립트에서 단순히 isAffected 데이터에 접근하는 용도로 사용되는 태그-->
-                    <div th:text="${comment.isAffected()}" id="viewIsAffected" hidden></div>
+                    <div th:text="${comment.isAffected()}" th:id="'viewIsAffected-'+${comment.id()}" hidden></div>
 
-                    <div hidden id="updatingForm">
-                        <form method="post" th:action="'/'+${comment.id()}+'/update'" id="updatingFormSubmit">
-                            <textarea id="updatingContent" name="updatingContent" class="form-control"></textarea>
+                    <div hidden th:id="'rootUpdatingForm-'+${comment.id()}">
+                        <form th:id="'rootUpdatingFormSubmit-'+${comment.id()}" method="post">
+                            <!--th:action="'/'+${comment.id()}+'/update'" -->
+                            <textarea th:id="'rootUpdatingContent-'+${comment.id()}" name="updatingContent"
+                                      class="form-control"></textarea>
                             <div style="padding-top: 8px; text-align: right">
-                                <small>[부모댓글 삭제 시 이 댓글]</small>
-                                <label><input type="radio" id="isAffectedDel" name="updatingIsAffected" value="1"><strong>삭제</strong></label>
-                                <label><input type="radio" id="isAffectedRem" name="updatingIsAffected" value="0" style="padding-right: 20px"><strong>남김</strong></label>
-                                <button id="updateSubmitButton"class="btn btn-primary btn-sm">등록</button>
+                                <button type="submit" class="btn btn-primary btn-sm">등록
+                                    <!--                                    온클릭 업데이팅 지움-->
+                                </button>
                             </div>
                         </form>
                     </div>
-                    </form>
 
-                    <!-- Child comment 1-->
-                    <!--                    <div class="d-flex mt-4">-->
-                    <!--                        <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>-->
-                    <!--                        <div class="ms-3">-->
-                    <!--                            <div class="fw-bold">Commenter Name</div>-->
-                    <!--                            And under those conditions, you cannot establish a capital-market evaluation of that enterprise. You can't get investors.-->
-                    <!--                        </div>-->
+
+                    <details th:if="${#authentication.name}==${comment.createdBy()}">
+                        <!--todo(V) 로그인해야만 보이게하기-->
+                        <summary>대댓글 달기</summary>
+                        <!--댓글 작성 폼 넣기, 이즈어펙티드 포함-->
+                        <div>
+                            <!--어떤 댓글의 대댓글인지 표시하기 위해 parentCommentId데이터 전달 : 쿼리스트링?인풋히든?pathvariable?어떤걸 선택해야할까?-->
+                            <!--Restful을 고려하여 pathvariable로 ... 근데 왜 쿼리스트링 "/save?parentCommentId=${comment.id()}"문법이 안되지? ㅅㅂ;-->
+                            <form class="mb-4" method="post" th:action="'/save/'+${comment.id()}" name="commentSave">
+                                                    <textarea class="form-control" name="content" rows="3"
+                                                              placeholder="댓글에 대해 대댓글을 남겨보세요!"></textarea>
+                                <div style="padding-top: 8px; text-align: right">
+                                    <small>[부모댓글 삭제 시 이 댓글]</small>
+                                    <input type="radio" name="isAffected" value="1" checked><strong>삭제</strong>
+                                    <input type="radio" name="isAffected" value="0" style="padding-right: 20px"><strong>남김</strong>
+                                    <button type="submit" class="btn btn-primary btn-sm"
+                                            onclick="preventIsAffectedNull()" id>등록
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </details>
+
+                    <hr>
+
+
+                    <!--대댓글 부분-->
+                    <!--뭘 반복해야하는가. childComments()-->
+                    <!--대댓글의 삭제,수정도 고려하면, updatingForm도 여기 적용되어야한다. 그냥 위 viewContent 대체해지듯 대체하면 되니 name으로 바꾸면 될듯-->
+                    <!--todo 이제 그럼 delete, update에서 가지고오는 부분도 바꿔야함. name으로 바꿨는데, 이제 이 댓글에 대한 수정삭제라는 정보를 어떻게 알려줄까?-->
+                    <!--content()가 아니라 content인 이유? // comment.content comment is commentDto, 지금 childCOmment는 엔티티인듯;;-->
+                    <!--todo Set<Comment>로 되어있던 부분을 Set<CommentDto>로 변경-->
+                    <!--todo 들여쓰기 구현? 대댓글임을 나타내는 1번만 들여쓰기 후 연속들여쓰기가 아닌 원댓글 작성자를 표시하기로 무한 대댓글구현? ㄴㄴ-->
+                    <!--childComment:${comment.childComments()는 1차대댓글만 뽑아오므로 n차대댓글뽑아오는 것이 중요, 그냥 대댓글의 자식댓글을 조회하면 될듯-->
+                    <!--재귀호출 필요: 중복되는 부분(콘텐트,작성자 가져오는 부분) 등-->
+
+                    <!--ms-3(들여쓰기)속성을 최상단에 배치함으로써는 반복문 및 재귀호출 시에 들여쓰기를 하지 않음. 즉 대댓글 시작시점에서 최초의 들여쓰기한번.-->
+                    <!--                    <div class="ms-5">-->
+                    <!--근데, 가독성이슈로 그냥 계층구조마다 띄우자 그냥.-->
+                    <th:block th:fragment="grandComment(childComments)">
+                        <div class="ms-3" th:if="!${commentList.isEmpty()}" th:each="childComment:${childComments}">
+                            <div class="flex-shrink-0"><img class="rounded-circle"
+                                                            src="https://dummyimage.com/50x50/ced4da/6c757d.jpg"
+                                                            alt="..."/>
+                                <span class="fw-bold" th:text="${childComment.createdBy()}"
+                                      style="padding-right: 15px"></span>
+                                <span style="text-align: right;">
+                                <span th:text="'수정일: '+${#temporals.format(childComment.modifiedDate(), 'yyyy-MM-dd HH:mm:ss')}"
+                                      style="font-size: small; padding-right: 25px"></span>
+                                <span th:text="'생성일: '+${#temporals.format(childComment.createdDate(), 'yyyy-MM-dd HH:mm:ss')}"
+                                      style="font-size: small; padding-right: 400px"></span>
+                                                                <button th:if="${#authentication.name}==${childComment.createdBy()}"
+                                                                        class="btn btn-outline-primary btn-sm"
+                                                                        style="font-size: small"
+                                                                        th:onclick="getUpdateForm(2,[[${childComment.id()}]])">수정</button>
+                                                                <button th:if="${#authentication.name}==${childComment.createdBy()}"
+                                                                        class="btn btn-outline-primary btn-sm"
+                                                                        style="font-size: small"
+                                                                        th:onclick="deleteComment([[${childComment.id()}]])">삭제</button>
+                            </span>
+                            </div>
+                            <!--TODO: (1)V원댓글작성자 닉네임 출력 (2)to.들어간 대댓글에 댓글달면 to.포함되게 저장됨(->자바스크립트로 콘텐츠출력헀으니 자스로해결해야할듯) V해결안해도해결됨 (3)V계층구조 ms-3 대댓글인경우 무조건 적용되는데 최초한번만 띄우고싶음-->
+                            <!--TODO: (4)대대댓글 정렬은 잘되는데 대댓글은 또 등록순정렬이 안된다. // 아직 타계정으로 테스트해보지는 않음. -->
+                            <div id="childViewContentContainer">
+                                <a href="#" style="font-size: smaller;text-decoration: none;font-weight: bold;">
+                                    <!--원댓글작성자 닉네임 출력을 위해 CommentDto에 부모댓글작성자 닉네임을 가져오는 함수를 추가, 여기서 호출-->
+                                    <!--DTO에 해당 필드를 추가해야함. 단순히 함수로 못가져옴. 리포지토리에대한 접근권한이 없기 때문-->
+                                    <span th:text="'to.'+${childComment.parentComment_Writer()}"></span>
+                                </a>
+                                <span th:id="'childViewContent-'+${childComment.id()}"
+                                      th:text="${childComment.content()}"></span>
+                            </div>
+                            <div th:text="${childComment.isAffected()}"
+                                 th:id="'childViewIsAffected-'+${childComment.id()}" hidden></div>
+
+
+                            <!--이 폼이 나타나는 위치는 대댓글달기 디테일 위쪽이니까 여기에 배치하는게 맞는것같다. 하지만 대댓글이 아니라 댓글인경우?-->
+                            <!--댓글수정의 경우 이 태그의 위치보다는 어떤 태그를 대체하는지가 중요하다-->
+                            <div hidden th:id="'childUpdatingForm-'+${childComment.id()}">
+                                <form th:id="'childUpdatingFormSubmit-'+${childComment.id()}" method="post">
+                                    <!--th:action="'/'+${comment.id()}+'/update'" -->
+                                    <textarea th:id="'childUpdatingContent-'+${childComment.id()}"
+                                              name="updatingContent" class="form-control"></textarea>
+                                    <div style="padding-top: 8px; text-align: right">
+                                        <small>[부모댓글 삭제 시 이 댓글]</small>
+                                        <label><input type="radio" th:id="'childIsAffectedDel-'+${childComment.id()}"
+                                                      name="updatingIsAffected"
+                                                      value="1"><strong>삭제</strong></label>
+                                        <label><input type="radio" th:id="'childIsAffectedRem-'+${childComment.id()}"
+                                                      name="updatingIsAffected" value="0"
+                                                      style="padding-right: 20px"><strong>남김</strong></label>
+                                        <!-- type="submit"-->
+                                        <button type="submit" class="btn btn-primary btn-sm">등록
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+
+                            <details th:if="${#authentication.name}==${comment.createdBy()}">
+                                <!--todo(V) 로그인해야만 보이게하기-->
+                                <summary>대댓글 달기</summary>
+                                <!--댓글 작성 폼 넣기, 이즈어펙티드 포함-->
+                                <div>
+                                    <!--어떤 댓글의 대댓글인지 표시하기 위해 parentCommentId데이터 전달 : 쿼리스트링?인풋히든?pathvariable?어떤걸 선택해야할까?-->
+                                    <!--Restful을 고려하여 pathvariable로 ... 근데 왜 쿼리스트링 "/save?parentCommentId=${comment.id()}"문법이 안되지? ㅅㅂ;-->
+                                    <form class="mb-4" method="post" th:action="'/save/'+${childComment.id()}"
+                                          name="commentSave">
+                                                    <textarea class="form-control" name="content" rows="3"
+                                                              placeholder="댓글에 대해 대댓글을 남겨보세요!"></textarea>
+                                        <div style="padding-top: 8px; text-align: right">
+                                            <small>[부모댓글 삭제 시 이 댓글]</small>
+                                            <input type="radio" name="isAffected" value="1"
+                                                   checked><strong>삭제</strong>
+                                            <input type="radio" name="isAffected" value="0"
+                                                   style="padding-right: 20px"><strong>남김</strong>
+                                            <button type="submit" class="btn btn-primary btn-sm"
+                                                    onclick="preventIsAffectedNull()">등록
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </details>
+
+                            <hr>
+
+                            <div th:if="${childComment.childComments() != null}">
+                                <div th:if="!${childComment.childComments().isEmpty()}">
+                                    <th:block
+                                            th:replace="::grandComment(${childComment.childComments()})"></th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
                     <!--                    </div>-->
-                    <!-- Child comment 2-->
-                    <!--                    <div class="d-flex mt-4">-->
-                    <!--                        <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>-->
-                    <!--                        <div class="ms-3">-->
-                    <!--                            <div class="fw-bold">Commenter Name</div>-->
-                    <!--                            When you put money directly to a problem, it makes a good headline.-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
+
+
+                    <!--같은경로에 있으므로 ::좌측은 생략-->
+                    <!--2차대댓글이 출력안되는 문제를 해결 중. th:replace가 한번일어나는 것이 아니라...-->
+                    <div th:if="!${comment.childComments().isEmpty()}">
+                        <th:block th:replace="::grandComment(${comment.childComments()})"></th:block>
+                    </div>
                 </div>
             </div>
             <hr>
-            <div class="fw-bold">&nbsp;Leave your reply!</div>
+
+
+            <div class="fw-bold">&nbsp;댓글을 남겨보세요!</div>
             <!-- Comment form-->
             <div>
-                <form class="mb-4" method="post" action="/save" id="commentSave">
+                <!--id->name commentSave: 댓글작성폼이 여기만 있는게 아니라, 대댓글작성부분에도 있기떄문, 같은 apig활용-->
+                <form class="mb-4" method="post" action="/save" name="commentSave">
                     <textarea class="form-control" name="content" rows="3"
-                              placeholder="Join the discussion and leave a comment!"></textarea>
+                              placeholder="댓글을 남겨 회원들과 대화해보세요."></textarea>
                     <div style="padding-top: 8px; text-align: right">
-                        <small>[부모댓글 삭제 시 이 댓글]</small>
-                        <input type="radio" name="isAffected" value="1" checked><strong>삭제</strong>
-                        <input type="radio" name="isAffected" value="0" style="padding-right: 20px"><strong>남김</strong>
                         <button type="submit" class="btn btn-primary btn-sm">등록</button>
                     </div>
                 </form>
             </div>
+
+
         </div>
     </div>
 </section>
+
 
 <!--로그인 성공했으면, 유저 받아와서 헤더와 댓글목록 사이에 자기아이디 띄우주면 될듯.-->
 <!--<ul style="text-align: center;">-->
@@ -197,162 +348,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
-<script>
-    async function deleteComment(commentId) {
-        // Prompt the user for the password
-        // if (enteredPassword !== null) {
-        //     // Set the entered password as the value of the hidden input field
-        //     document.getElementById("deletePasswordInput").value = enteredPassword;
-        //     // Submit the form
-        //     document.getElementById("deleteForm").submit();
-        // }
-        //주석처리는 기존에 ajax 배우기 전 상태에서 작성한 코드, 이제는 fetch활용
-        // 코드의 의도는 아마 응답이 성공적인 경우에 대한 처리를 하고자 한 것으로 보입니다. 하지만 response == response.ok와 같이 비교하는 부분이 문제가 있습니다. response는 객체이고, response.ok는 true 또는 false 값을 가지는 불리언입니다. 이 둘은 다른 타입이므로 response == response.ok는 항상 false가 됩니다.
 
-        try {
-            const enteredPassword = prompt("삭제하시겠습니까?\n\n비밀번호를 입력하세요.");
-            console.log("deleteResponse를 받습니다");
-            const deleteResponse = await fetch('/' + commentId + '/delete', {    //문법기억
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(enteredPassword)
-            });
-            console.log("deleteResponse값을 판단하는 제어문을 탑니다");
-            if (deleteResponse.ok) {
-                console.log("deleteResponse값: ok");
-                // await fetch("/", {
-                //     method : 'GET',
-                //     cache : "no-cache"
-                // });
-                // location.href="/";
-                location.reload(); // 이것도 위와 똑같이 작동함, 비동기식으로 댓글리스트만 최신화하는것에 실패했기에 어쩔 수 없이 전제페이지를 리로드
-                console.log("삭제 후 location.reload()");
-            } else {
-                console.log("deleteResponse값: badrequest ");
-                const errorTextDeleting = await deleteResponse.text();
-                throw new Error(errorTextDeleting);
-            }
-            console.log("deleteResponse: " + deleteResponse.status);
-        } catch (error) {
-            console.log(error);
-        }
-        // .then(response => {
-        //     console.log(".then(response => { 이후 실행중")
-        //     if (response.ok) {
-        //         fetch("/")
-        //             .then(
-        //                 () => {
-        //                     console.log("댓글 삭제를 완료하고 " / "로 요청을 보냈습니다. commentId: " + commentId);
-        //                 }
-        //             )
-        //             .catch(
-        //                 () =>{
-        //                     console.log("fetch("/")에 실패");
-        //                 }
-        //             );
-        //     } else {
-        //         response.text().then(errorMessage => {
-        //             alert(errorMessage);
-        //         });
-        //     }
-        // })
-        //
-        // .catch(
-        //     () => {
-        //         alert("서버와 통신 중 에러가 발생했습니다.");
-        //     }
-        // )
-    }
-
-    function getUpdateForm() {
-        const enteredPassword = prompt("수정하시겠습니까?\n\n비밀번호를 입력하세요.");
-
-        //주석처리는 기존에 ajax 배우기 전 상태에서 작성한 코드, 이제는 fetch활용
-        fetch("/password-checker", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(enteredPassword)
-        }).then(
-            response => {
-                if (response.ok) {
-                    // alert("after response.ok!"); //ㅇㅋ 이쪽으로 흐름은 옴
-                    //비밀번호 제출 후 - 사용자의 입력을 받기
-                    let baseContentDiv = document.getElementById("viewContent");
-                    const baseContentContent = baseContentDiv.innerText;
-                    // alert(baseContentContent); ㅇㅋ
-                    // let textarea = document.createElement("textarea");
-                    // textarea.value = baseContentContent;
-                    document.getElementById("updatingContent").innerText = baseContentContent;
-                    // alert("after inserting basecontentcontent to new textarea") //여기까진 문제없음 서통에는 이 다음중에 뜸
-
-                    //추가적으로, isAffected 관련된 요소를 보여주어야한다.
-                    const val = document.getElementById("viewIsAffected").innerText;
-                    // alert(1)
-                    if (val === "false") {
-                        document.getElementById("isAffectedRem").setAttribute("checked", "");
-                    } else if (val === "true") {
-                        document.getElementById("isAffectedDel").setAttribute("checked", "");
-                    }
-                    // alert(2);
-                    baseContentDiv.setAttribute("hidden", "");
-                    // alert(3);
-                    document.getElementById("updatingForm").removeAttribute("hidden");
-                    // alert(4);
-                    //위에서 수정폼을 기존내용까지 포함하여 다 띄웠으므로, 이제 submit만 작동하게 하면 된다.
-                    //submit vs fetch 요청보낼떄 어떻게하지?
-                    document.getElementById("updateSubmitButton").onclick; //4하고 5사이에서 catch()로 흐름이 간다.
-                    //type=submit 버튼에는 js에서 .onclick하고, .submit은 폼에다가 적용하는거, 이때 버튼의 동작을 방지하기 위한 preventDefault필요
-                    //submit() 메서드는 <form> 요소에서 사용되는 메서드
-                    // const updatingForm = document.getElementById("updatingFormSubmit");
-                    // updatingForm.submit();
-                    // alert(5);
-                    // response.ok가 true일 때는 첫 번째 then() 블록 내부에서 리턴값이 없으면 두 번째 then() 블록은 실행되지 않습니다.
-                    // 비동기 함수의 then() 메서드 체인은 이전 then() 블록에서 리턴한 Promise 객체가 성공적으로 처리된 경우에만 다음 then() 블록이 실행되기 때문입니다.
-                    // 원노트 참고
-                } else{
-                    // alert(response.body+"에러라궄ㅋ"); -> .body는 이렇게 접근하는게 아닌가보다
-                    // alert(response.text()+"에러라구 ㅋ");
-                    alert("자바스크립트: 비밀번호 불일치");
-                    // console.log(response.text());    .text()자체가 프로미스를 반환하기때문에 후처리를 안해주면 catch를 무조건 타게된다
-                }
-            }
-        )
-            .catch(
-                () => {
-                    alert("서버와 통신 중 에러가 발생하였습니다.");
-                }
-            );
-
-
-        // if (enteredPassword !== null) {
-        //     document.getElementById("updatePasswordInput").value = enteredPassword;
-        //     document.getElementById("updateForm").submit();
-        //     //여기서 에러가 발생한다면? null 입력되었다면? 위 delete에서도 공통적으로 처리되어야한다.
-        //     //에러1 : 비밀번호가 일치하지않음(현재 프론트에서 검증불가) , 에러2 : 프론트에서 아마 검증 가능 할 비밀번호 공백문자입력상황
-        // }
-        //비밀번호 제출 후 - 사용자의 입력을 받기
-        // let baseDiv = document.getElementById("viewContent");
-        // const baseContent = baseDiv.innerText;
-        // let textarea = document.createElement("textarea");
-        // textarea.value = baseContent;
-        //
-        // //추가적으로, isAffected 관련된 요소를 보여주어야한다.
-        // const val = document.getElementById("viewIsAffected").innerText;
-        // if(val==0){
-        //     document.getElementById("isAffectedRem").setAttribute("checked", "");
-        // }
-        // else if(val==1){
-        //     document.getElementById("isAffectedDel").setAttribute("checked", "");
-        // }
-        // document.getElementById("whenUpdating").removeAttribute("hidden");
-        //content는 뷰에서 보여줬었지만 isAffected는 뷰에서 안보여줬었단 말야? 그럼 또 하나를 가져와야겠네. <div>도 hidden이 되나?
-        //사용자 입력을 서버로 전달하기
-    }
-</script>
 
 <!--<script th:if="${updatable}">-->
 <!--최신, 접음 이방법 ㅅㅂ-->
@@ -409,6 +405,210 @@
 <!--        // document.getElementById("whenUpdating").removeAttribute("hidden");-->
 <!--    }-->
 <!--</script>-->
+
+<script>
+    function preventIsAffectedNull(event) {
+        const radio = document.querySelector('input[name="radioOption"]:checked');
+        if (!radio) {
+            event.preventDefault();  //이부분 미구현, 떠난 이유
+            alert("부모댓글 삭제 시 해당댓글의 삭제 여부 선택은 필수입니다.");
+        }
+    }
+
+
+    async function deleteComment(commentId) {
+        // Prompt the user for the password
+        // if (enteredPassword !== null) {
+        //     // Set the entered password as the value of the hidden input field
+        //     document.getElementById("deletePasswordInput").value = enteredPassword;
+        //     // Submit the form
+        //     document.getElementById("deleteForm").submit();
+        // }
+        //주석처리는 기존에 ajax 배우기 전 상태에서 작성한 코드, 이제는 fetch활용
+        // 코드의 의도는 아마 응답이 성공적인 경우에 대한 처리를 하고자 한 것으로 보입니다. 하지만 response == response.ok와 같이 비교하는 부분이 문제가 있습니다. response는 객체이고, response.ok는 true 또는 false 값을 가지는 불리언입니다. 이 둘은 다른 타입이므로 response == response.ok는 항상 false가 됩니다.
+
+        try {
+            const enteredPassword = prompt("삭제하시겠습니까?\n\n비밀번호를 입력하세요.");
+            console.log("deleteResponse를 받습니다");
+            const deleteResponse = await fetch('/' + commentId + '/delete', {    //문법기억
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(enteredPassword)
+            });
+            console.log("deleteResponse값을 판단하는 제어문을 탑니다");
+            if (deleteResponse.ok) {
+                console.log("deleteResponse값: ok");
+                // await fetch("/", {       /로 요청보내어 비동기식으로 수정된 데이터(댓글목록)만 받아오려고 했으나 모종의 이유로 실패;
+                //     method : 'GET',
+                //     cache : "no-cache"
+                // });
+                // location.href="/";
+                location.reload(); // 이것도 위와 똑같이 작동함, 비동기식으로 댓글리스트만 최신화하는것에 실패했기에 어쩔 수 없이 전제페이지를 리로드
+                console.log("삭제 후 location.reload()");
+            } else {
+                console.log("deleteResponse값: badrequest ");
+                const errorTextDeleting = await deleteResponse.text();
+                throw new Error(errorTextDeleting);
+            }
+            console.log("deleteResponse: " + deleteResponse.status);
+        } catch (error) {
+            console.log(error);
+        }
+        // .then(response => {
+        //     console.log(".then(response => { 이후 실행중")
+        //     if (response.ok) {
+        //         fetch("/")
+        //             .then(
+        //                 () => {
+        //                     console.log("댓글 삭제를 완료하고 " / "로 요청을 보냈습니다. commentId: " + commentId);
+        //                 }
+        //             )
+        //             .catch(
+        //                 () =>{
+        //                     console.log("fetch("/")에 실패");
+        //                 }
+        //             );
+        //     } else {
+        //         response.text().then(errorMessage => {
+        //             alert(errorMessage);
+        //         });
+        //     }
+        // })
+        //
+        // .catch(
+        //     () => {
+        //         alert("서버와 통신 중 에러가 발생했습니다.");
+        //     }
+        // )
+    }
+
+    function getUpdateForm(num, commentId) {
+        console.log("num: " + num);
+        //target = 변경대상, 폼으로 대체될 부분
+        const targetContentTag = num == 1 ? "viewContent-" + commentId : "childViewContent-" + commentId;
+        const targetIsAffectedTag = num == 1 ? null : "childViewIsAffected-" + commentId;
+        const updatingFormFragment = num == 1 ? "rootUpdatingForm-" + commentId : "childUpdatingForm-" + commentId;
+        const enteredPassword = prompt("수정하시겠습니까?\n\n비밀번호를 입력하세요.");
+
+        //주석처리는 기존에 ajax 배우기 전 상태에서 작성한 코드, 이제는 fetch활용
+        fetch("/password-checker", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(enteredPassword)
+        }).then(
+            response => {
+                if (response.ok) {
+                    //위에서 수정폼을 기존내용까지 포함하여 다 띄웠으므로, 이제 submit만 작동하게 하면 된다.
+                    //submit vs fetch 요청보낼떄 어떻게하지?
+                    //이 아래부분들은 스크립트 위쪽에서 해서 최대한 빠르게 requestUrl을 설정하고 form.action을 설정하면 되지않을까?(실행완료)
+                    const requestUrl = '/' + commentId + '/update';
+                    console.log("requestUrl: " + requestUrl);
+                    const target = num == 1 ? "rootUpdatingFormSubmit-" + commentId : "childUpdatingFormSubmit-" + commentId;
+                    console.log("target: " + target);
+                    const form = document.getElementById(target);
+                    form.action = requestUrl;
+                    console.log("form.action 설정완료");
+                    // 액션값까지만 지정해주고, 등록버튼을 누르면 제출이벤트가 발생되도록 구현하면된다. 즉 - HTML의 폼부분을 보자.
+
+
+                    // alert("after response.ok!"); //ㅇㅋ 이쪽으로 흐름은 옴
+                    //비밀번호 제출 후 - 사용자의 입력을 받기
+                    let baseContentDiv = document.getElementById(targetContentTag);
+                    const baseContentContent = baseContentDiv.innerText;
+
+                    console.log("targetContentTag: " + targetContentTag);
+                    console.log("baseContentContent: " + baseContentContent);
+                    // alert(baseContentContent); ㅇㅋ
+                    // let textarea = document.createElement("textarea");
+                    // let textarea = document.createElement("textarea");
+                    // textarea.value = baseContentContent;
+                    if (num == 1) {
+                        console.log("doc.getElem.rootUpdatingForm");
+                        document.getElementById("rootUpdatingContent-" + commentId).innerText = baseContentContent;
+                    } else if (num == 2) {
+                        console.log("doc.getElem.childUpdatingForm");
+                        document.getElementById("childUpdatingContent-" + commentId).innerText = baseContentContent;
+                    }
+                    // alert("after inserting basecontentcontent to new textarea") //여기까진 문제없음 서통에는 이 다음중에 뜸
+
+                    //추가적으로, isAffected 관련된 요소를 보여주어야한다.
+                    console.log("targetIsAffectedTag: " + targetIsAffectedTag);
+
+                    if (targetIsAffectedTag != null) {
+                        const val = document.getElementById(targetIsAffectedTag).innerText;
+                        console.log("print( document.getElementById(targetIsAffectedTag).innerText ) : " + val)
+                        // alert(1)
+                        if (val === "false") {
+                            document.getElementById("childIsAffectedRem-" + commentId).setAttribute("checked", "");
+                        } else if (val === "true") {
+                            document.getElementById("childIsAffectedDel-" + commentId).setAttribute("checked", "");
+                        }
+                    }
+                    // alert(2);
+                    // baseContentDiv.setAttribute("hidden", ""); -> 댓글, 대댓글에 각각이 UpdatingForm이 생겼으므로 대체(실제대체는 아니고 숨기고숨겼던거나타내고)하려면 분기필요
+                    if (num == 1) {
+                        document.getElementById(targetContentTag).setAttribute("hidden", "");
+                        document.getElementById(updatingFormFragment).removeAttribute("hidden");
+                    } else if (num == 2) {
+                        document.getElementById(targetContentTag).setAttribute("hidden", "");
+                        document.getElementById(updatingFormFragment).removeAttribute("hidden");
+                    }
+
+
+                    //type=submit 버튼에는 js에서 .onclick하고, .submit은 폼에다가 적용하는거, 이때 버튼의 동작을 방지하기 위한 preventDefault필요
+                    //submit() 메서드는 <form> 요소에서 사용되는 메서드
+                    // const updatingForm = document.getElementById("updatingFormSubmit");
+                    // updatingForm.submit();
+                    // alert(5);
+                    // response.ok가 true일 때는 첫 번째 then() 블록 내부에서 리턴값이 없으면 두 번째 then() 블록은 실행되지 않습니다.
+                    // 비동기 함수의 then() 메서드 체인은 이전 then() 블록에서 리턴한 Promise 객체가 성공적으로 처리된 경우에만 다음 then() 블록이 실행되기 때문입니다.
+                    // 원노트 참고
+                } else {
+                    // alert(response.body+"에러라궄ㅋ"); -> .body는 이렇게 접근하는게 아닌가보다
+                    // alert(response.text()+"에러라구 ㅋ");
+                    alert("자바스크립트: 비밀번호 불일치");
+                    // console.log(response.text());    .text()자체가 프로미스를 반환하기때문에 후처리를 안해주면 catch를 무조건 타게된다
+                }
+            }
+        )
+            .catch(
+                () => {
+                    alert("서버와 통신 중 에러가 발생하였습니다.");
+                }
+            );
+
+
+        // if (enteredPassword !== null) {
+        //     document.getElementById("updatePasswordInput").value = enteredPassword;
+        //     document.getElementById("updateForm").submit();
+        //     //여기서 에러가 발생한다면? null 입력되었다면? 위 delete에서도 공통적으로 처리되어야한다.
+        //     //에러1 : 비밀번호가 일치하지않음(현재 프론트에서 검증불가) , 에러2 : 프론트에서 아마 검증 가능 할 비밀번호 공백문자입력상황
+        // }
+        //비밀번호 제출 후 - 사용자의 입력을 받기
+        // let baseDiv = document.getElementById("viewContent");
+        // const baseContent = baseDiv.innerText;
+        // let textarea = document.createElement("textarea");
+        // textarea.value = baseContent;
+        //
+        // //추가적으로, isAffected 관련된 요소를 보여주어야한다.
+        // const val = document.getElementById("viewIsAffected").innerText;
+        // if(val==0){
+        //     document.getElementById("isAffectedRem").setAttribute("checked", "");
+        // }
+        // else if(val==1){
+        //     document.getElementById("isAffectedDel").setAttribute("checked", "");
+        // }
+        // document.getElementById("whenUpdating").removeAttribute("hidden");
+        //content는 뷰에서 보여줬었지만 isAffected는 뷰에서 안보여줬었단 말야? 그럼 또 하나를 가져와야겠네. <div>도 hidden이 되나?
+        //사용자 입력을 서버로 전달하기
+    }
+</script>
+
+
 </body>
 
 <footer th:replace="footer::footer"/>
