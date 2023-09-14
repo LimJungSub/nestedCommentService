@@ -3,10 +3,19 @@
 
 # 사용기술
 spring boot 3.0.6
+
+
 thymeleaf3
+
+
 Hibernate ORM core version 6.1.7
+
+
 mysql 8.0.33
+
+
 spring-security-web-6.0.3
+
 
 
 # 핵심 기술 중 어려웠던 점+
