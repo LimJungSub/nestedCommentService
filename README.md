@@ -221,7 +221,7 @@ public void saveComment(String content, Optional<Boolean> isAffected, String use
     }
 ```
 
-* <details>, <summary>를 통해 대댓글달기버튼처럼 활용
+* details와 summary 태그를 통해 대댓글달기버튼처럼 활용
 ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/043f15b1-cd8a-4c08-9248-2c016ca8124d)
 
 * 누구에게 대댓글을 달았는지, 즉 부모댓글의 작성자를 앞에 표시
