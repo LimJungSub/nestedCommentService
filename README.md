@@ -54,12 +54,14 @@ spring-security-web-6.0.3
 전체적인 구조는 아래와 같다.
 
 ```html
+*** index.html
+
 <div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-1">
-...
+                    ...
                     <div th:if="!${comment.childComments().isEmpty()}">
                         <th:block th:replace="::grandComment(${comment.childComments()})"></th:block>
                     </div>
-...
+                    ...
                      <th:block th:fragment="grandComment(childComments)">
                      ...
                             <div th:if="${childComment.childComments() != null}">
@@ -81,6 +83,8 @@ spring-security-web-6.0.3
 과정에서 @PageableDefault 어노테이션을 사용하여 루트댓글들은 작성일 기준 내림차순으로 화면에 정렬되게 하였다.
 
 ```java
+***CommentController.java
+
 @GetMapping("/")
     public String comments(
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
