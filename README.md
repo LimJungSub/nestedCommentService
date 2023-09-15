@@ -26,8 +26,6 @@ javascript fetch api
 
 # 핵심 기술 구현
 
----
-
 ## 대댓글의 CASCDING기능 - 부모댓글이 삭제될 시 연계삭제 여부를 결정하는 변수 사용
 
 엔티티의 Boolean isAffected 필드를 통해 구현하였다.
