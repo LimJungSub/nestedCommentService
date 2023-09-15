@@ -89,6 +89,7 @@ spring-security-web-6.0.3
     public Page<CommentDto> getRootComments(Pageable pageable) {
         List<Comment> list = commentRepository.findByParentIdIsNull();
         return commentRepository.findByParentIdIsNull(pageable).map(CommentDto::toDto);
+   }
 ```
 
 ```java
