@@ -159,9 +159,9 @@ public static CommentDto toDto(Comment comment){
 
 ### 댓글 등록하기
 
-댓글 등록 : POST /save
+* 댓글 등록 : POST /save
 
-대댓글 등록 : POST /save/{parnetCommentId}
+* 대댓글 등록 : POST /save/{parnetCommentId}
 
 둘 다 서비스계층(CommentService.java)의 saveComment()를 사용하도록 구현 함. 등록할 댓글이 루트댓글이라면 isAffected와 parentCommentId는 넘어오지 않으니, Optional처리하여 서비스로 넘겨준다. 자식 댓글일 때는 둘 다 넘어옴.
 
@@ -194,7 +194,7 @@ public static CommentDto toDto(Comment comment){
 
 서비스에서는 컨트롤러에서 넘어온 두 Optional값을 통해 등록될 댓글이 대댓글인지 판단하고,
 
-대댓글일때 부모댓글에 이 댓글을 자식으로 등록해주고, 자식댓글은 부모댓글작성자 출력을 위한 변수 세팅을 해줌
+대댓글일때 부모댓글에 이 댓글을 자식으로 등록해주고, 자식댓글은 부모댓글작성자 출력을 위한 변수 parentComment_Writer 세팅을 해줌
 
 
 
@@ -224,12 +224,88 @@ public void saveComment(String content, Optional<Boolean> isAffected, String use
 * details와 summary 태그를 통해 대댓글달기버튼처럼 활용
 ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/043f15b1-cd8a-4c08-9248-2c016ca8124d)
 
-* 누구에게 대댓글을 달았는지, 즉 부모댓글의 작성자를 앞에 표시
+* 누구에게 대댓글을 달았는지, 즉 부모댓글의 작성자 parentComment_Writer 를 앞에 표시
 ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/52ae7137-6821-4e10-9e3f-1362cc0fc08c)
 
 
 
 ### 댓글 수정하기
+
+추가 비밀번호 검증과정을 거쳐 작성자 본인이 맞는지 재확인 후 수정폼 띄움.
+
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/a740a1c9-ac27-4ced-ac12-7cfe04bb1152)
+
+비밀번호 일치 시 response.ok 반환받음, 아래와 같이 기존 내용 폼에 그대로 담아 출력하여 기존내용을 바탕으로 수정할 수 있게함. JavaScript의 fetch API를 통해 구현함.
+수정폼이 숨겨져있다가 나타나는 방식(자바스크립트를 통한 hidden속성 해제)으로 구현함. 
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/564e3db0-e80f-44c6-b5ce-3dd1d35108a8)
+
+```javascript
+function getUpdateForm(num, commentId) {
+        //target = 변경대상, 폼으로 대체될 부분
+        const targetContentTag = num == 1 ? "viewContent-" + commentId : "childViewContent-" + commentId;
+        const targetIsAffectedTag = num == 1 ? null : "childViewIsAffected-" + commentId;
+        const updatingFormFragment = num == 1 ? "rootUpdatingForm-" + commentId : "childUpdatingForm-" + commentId;
+        const enteredPassword = prompt("수정하시겠습니까?\n\n비밀번호를 입력하세요.");
+
+        fetch("/password-checker", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(enteredPassword)
+        }).then(
+            response => {
+                if (response.ok) {
+                    const requestUrl = '/' + commentId + '/update';
+                    const target = num == 1 ? "rootUpdatingFormSubmit-" + commentId : "childUpdatingFormSubmit-" + commentId;
+                    const form = document.getElementById(target);
+                    form.action = requestUrl;
+                    // 액션값까지만 지정해주고, 등록버튼을 누르면 제출이벤트가 발생되도록 구현하면된다. 
+
+
+                    //비밀번호 제출 후 - 사용자의 입력을 받기
+
+                    //원댓글의 Content 가져오기
+                    let baseContentDiv = document.getElementById(targetContentTag);
+                    const baseContentContent = baseContentDiv.innerText;
+
+                    console.log("targetContentTag: " + targetContentTag);
+                    console.log("baseContentContent: " + baseContentContent);
+                    if (num == 1) {
+                        document.getElementById("rootUpdatingContent-" + commentId).innerText = baseContentContent;
+                    } else if (num == 2) {
+                        document.getElementById("childUpdatingContent-" + commentId).innerText = baseContentContent;
+                    }
+                    
+                    //원댓글의 isAffected 가져오기
+                    if (targetIsAffectedTag != null) {
+                        const val = document.getElementById(targetIsAffectedTag).innerText;
+                        console.log("print( document.getElementById(targetIsAffectedTag).innerText ) : " + val)
+                        if (val === "false") {
+                            document.getElementById("childIsAffectedRem-" + commentId).setAttribute("checked", "");
+                        } else if (val === "true") {
+                            document.getElementById("childIsAffectedDel-" + commentId).setAttribute("checked", "");
+                        }
+                    }
+                    if (num == 1) {
+                        document.getElementById(targetContentTag).setAttribute("hidden", "");
+                        document.getElementById(updatingFormFragment).removeAttribute("hidden");
+                    } else if (num == 2) {
+                        document.getElementById(targetContentTag).setAttribute("hidden", "");
+                        document.getElementById(updatingFormFragment).removeAttribute("hidden");
+                    }
+                } else {
+                    alert("자바스크립트: 비밀번호 불일치");
+                }
+            }
+        )
+            .catch(
+                () => {
+                    alert("서버와 통신 중 에러가 발생하였습니다.");
+                }
+            );
+}
+```
 
 ### 댓글 삭제하기
 
