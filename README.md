@@ -80,7 +80,16 @@ spring-security-web-6.0.3
 
 우선 컨트롤러에서 뷰쪽으로 넘겨주는 commentList에는 루트댓글들만 넘겨준다. 루트댓글들만 넘겨주어도 계층형식으로 대댓글들이 연결되어있기때문에 괜찮다.
 
-과정에서 @PageableDefault 어노테이션을 사용하여 루트댓글들은 작성일 기준 내림차순으로 화면에 정렬되게 하였다.
+컨트롤러에서 @PageableDefault 어노테이션을 사용하여 루트댓글들을 정렬된 상태로 가져왔다.
+
+
+```java
+*** CommentService.java
+
+    public Page<CommentDto> getRootComments(Pageable pageable) {
+        List<Comment> list = commentRepository.findByParentIdIsNull();
+        return commentRepository.findByParentIdIsNull(pageable).map(CommentDto::toDto);
+```
 
 ```java
 ***CommentController.java
