@@ -162,6 +162,7 @@ public static CommentDto toDto(Comment comment){
 ### 댓글 등록하기
 
 재귀호출을 통해 댓글과 그에 달린 대댓글을 출력하는 구조 상, 대댓글 등록 기능은 "(1)루트댓글에 대한 대댓글 달기"와 "(2)대댓글에 대한 대댓글 달기"로 뷰에서 나누어서 처리하였음.
+
 ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/fce3fc14-9d5e-4e3e-a8ea-3af2d251df2c)
 
 
