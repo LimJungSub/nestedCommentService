@@ -26,6 +26,8 @@ javascript fetch api
 
 # 핵심 기술 구현
 
+---
+
 ## 대댓글의 CASCDING기능 - 부모댓글이 삭제될 시 연계삭제 여부를 결정하는 변수 사용
 
 엔티티의 Boolean isAffected 필드를 통해 구현하였다.
@@ -39,8 +41,9 @@ javascript fetch api
 대댓글 수정 시에도 대댓글 작성자가 해당 옵션을 변경할 수 있게 허용했다.
  ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/02b210ac-eca2-4189-b981-ce13e4770ab5)
 
+---
 
-## 무한대댓글 출력구조
+## 무한대댓글 출력구조와 정렬
 
 ### 출력구조
 
@@ -154,10 +157,7 @@ public static CommentDto toDto(Comment comment){
     }
 ```
 
-### 대댓글 출력구조-데이터는 어떻게 전송했는가
-organizechilds
-+기존구조의 문제점
-
+---
 
 ## 대댓글 작성
 
