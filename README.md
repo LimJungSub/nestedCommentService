@@ -221,9 +221,11 @@ public void saveComment(String content, Optional<Boolean> isAffected, String use
     }
 ```
 
-*추가기능 - 부모댓글의 작성자를 표시함으로써 가시성 향상
-![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/4d9a88d3-b16b-4614-baa7-16465b70f911)
+* <details>, <summary>를 통해 대댓글달기버튼처럼 활용
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/043f15b1-cd8a-4c08-9248-2c016ca8124d)
 
+* 누구에게 대댓글을 달았는지, 즉 부모댓글의 작성자를 앞에 표시
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/52ae7137-6821-4e10-9e3f-1362cc0fc08c)
 
 
 
