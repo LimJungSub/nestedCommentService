@@ -310,6 +310,22 @@ function getUpdateForm(num, commentId) {
 }
 ```
 
+### 수정기능 구현하며 깨달은 점
+
+문제를 겪었던 점은
+
+* 문제1 : 내용못가져옴
+* 
+* 문제2:  수정폼뜨는위치가 맞지않음
+
+사진으로보면 아래와 같았다.
+
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/fcfa67fd-4b59-4d63-8a31-e96d069b939b)
+
+
+* 해결: 수정버튼을 누르는 시점은 이미 다 댓글들이 뷰에 렌더링 된 후 이기에 정확히 어떤 코멘트인지를 잡아주지 못해서 그랬었음.
+
+
 ### 댓글 삭제하기
 
 
