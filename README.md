@@ -269,21 +269,18 @@ function getUpdateForm(num, commentId) {
                     //비밀번호 제출 후 - 사용자의 입력을 받기
 
                     //원댓글의 Content 가져오기
-                    let baseContentDiv = document.getElementById(targetContentTag);
-                    const baseContentContent = baseContentDiv.innerText;
+                    let baseCommentDiv = document.getElementById(targetContentTag);
+                    const baseCommentContent = baseCommentDiv.innerText;
 
-                    console.log("targetContentTag: " + targetContentTag);
-                    console.log("baseContentContent: " + baseContentContent);
                     if (num == 1) {
-                        document.getElementById("rootUpdatingContent-" + commentId).innerText = baseContentContent;
+                        document.getElementById("rootUpdatingContent-" + commentId).innerText = baseCommentContent;
                     } else if (num == 2) {
-                        document.getElementById("childUpdatingContent-" + commentId).innerText = baseContentContent;
+                        document.getElementById("childUpdatingContent-" + commentId).innerText = baseCommentContent;
                     }
                     
                     //원댓글의 isAffected 가져오기
                     if (targetIsAffectedTag != null) {
                         const val = document.getElementById(targetIsAffectedTag).innerText;
-                        console.log("print( document.getElementById(targetIsAffectedTag).innerText ) : " + val)
                         if (val === "false") {
                             document.getElementById("childIsAffectedRem-" + commentId).setAttribute("checked", "");
                         } else if (val === "true") {
@@ -315,7 +312,7 @@ function getUpdateForm(num, commentId) {
 문제를 겪었던 점은
 
 * 문제1 : 내용못가져옴
-* 
+
 * 문제2:  수정폼뜨는위치가 맞지않음
 
 사진으로보면 아래와 같았다.
@@ -324,6 +321,8 @@ function getUpdateForm(num, commentId) {
 
 
 * 해결: 수정버튼을 누르는 시점은 이미 다 댓글들이 뷰에 렌더링 된 후 이기에 정확히 어떤 코멘트인지를 잡아주지 못해서 그랬었음.
+
+* 각 댓글이 렌더링 되는 쪽에 id를 부여해서 해결할 수 있었는데, 단순히 viewIsAffected와 viewContent에만 id를 붙여주는 것이 아닌, 숨겨졌던 updatingForm쪽에도 id를 붙여줘서 해결했어야했음. 위 js코드를 보면 변수들에 +commentId가 붙어있는데 해결 결과로써 나타난 코드이다.
 
 
 ### 댓글 삭제하기
