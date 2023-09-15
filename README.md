@@ -161,9 +161,68 @@ public static CommentDto toDto(Comment comment){
 
 ### 댓글 등록하기
 
-재귀호출을 통해 댓글과 그에 달린 대댓글을 출력하는 구조 상, 대댓글 등록 기능은 "(1)루트댓글에 대한 대댓글 달기"와 "(2)대댓글에 대한 대댓글 달기"로 뷰에서 나누어서 처리하였음.
+댓글 등록 : POST /save
 
-![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/fce3fc14-9d5e-4e3e-a8ea-3af2d251df2c)
+대댓글 등록 : POST /save/{parnetCommentId}
+
+둘 다 서비스계층(CommentService.java)의 saveComment()를 사용하도록 구현 함. 등록할 댓글이 루트댓글이라면 isAffected와 parentCommentId는 넘어오지 않으니, Optional처리하여 서비스로 넘겨준다. 자식 댓글일 때는 둘 다 넘어옴.
+
+```java
+***CommentController.java
+
+@PostMapping( "/save")
+    public String saveComment(
+            @RequestParam String content,
+            @AuthenticationPrincipal UserAccountPrincipal principal
+        )
+    {
+        commentService.saveComment(content, Optional.empty(), principal.getUsername(), Optional.empty());
+        return "redirect:/";
+    }
+
+@PostMapping( "/save/{parentCommentId}")
+    public String saveChildComment(
+            @RequestParam String content,
+            @RequestParam String isAffected,
+            @AuthenticationPrincipal UserAccountPrincipal principal,
+            @PathVariable(required = false) String parentCommentId
+        )
+    {
+        commentService.saveComment(content, Optional.of(isAffected.equals("1") ? true : false), principal.getUsername(), Optional
+                .ofNullable(Long.parseLong(parentCommentId)));
+        return "redirect:/";
+    }
+```
+
+서비스에서는 컨트롤러에서 넘어온 두 Optional값을 통해 등록될 댓글이 대댓글인지 판단하고,
+
+대댓글일때 부모댓글에 이 댓글을 자식으로 등록해주고, 자식댓글은 부모댓글작성자 출력을 위한 변수 세팅을 해줌
+
+
+
+```java
+***CommentService.java
+
+public void saveComment(String content, Optional<Boolean> isAffected, String userId, Optional<Long> parentCommentId) {
+        //userid를 통해 user 가져옴
+        UserAccount user = userAccountRepository.findByUserId(userId).get();
+
+        if (parentCommentId.isPresent()) {
+            String parentComment_Writer = commentRepository.findById(parentCommentId.get()).get().getCreatedBy();
+            log.info("(서비스) commentRepository.findById(parentCommentId.get()).get()"+commentRepository.findById(parentCommentId.get()).get());
+            Comment targetComment = Comment.of(content, isAffected, user, parentCommentId, parentComment_Writer);
+            Comment parentComment = commentRepository.getReferenceById(parentCommentId.get());
+            parentComment.addChildComment(targetComment);
+            log.info("parentComment.addChildComment(targetComment); 실행 후 " + parentComment.getId() + "의 자식: " + parentComment.getChildComments());
+            commentRepository.save(targetComment);
+        }
+        else {
+            Comment targetComment = Comment.of(content, isAffected, user, parentCommentId, null);
+            commentRepository.save(targetComment);
+        }
+    }
+```
+
 
 
 
