@@ -157,9 +157,18 @@ public static CommentDto toDto(Comment comment){
 
 ---
 
-## 대댓글 작성
+## 댓글 CRUD
 
--하나의 API를 통해 루트댓글저장과 대댓글저장을 한번에 처리
+### 댓글 등록하기
+
+재귀호출을 통해 댓글과 그에 달린 대댓글을 출력하는 구조 상, 대댓글 등록 기능은 "(1)루트댓글에 대한 대댓글 달기"와 "(2)대댓글에 대한 대댓글 달기"로 뷰에서 나누어서 처리하였음.
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/fce3fc14-9d5e-4e3e-a8ea-3af2d251df2c)
+
+
+
+### 댓글 수정하기
+
+### 댓글 삭제하기
 
 
 
