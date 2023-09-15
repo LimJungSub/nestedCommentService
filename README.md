@@ -55,10 +55,13 @@ spring-security-web-6.0.3
 
 ```
 <div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-1">
+...
                     <div th:if="!${comment.childComments().isEmpty()}">
                         <th:block th:replace="::grandComment(${comment.childComments()})"></th:block>
                     </div>
+...
                      <th:block th:fragment="grandComment(childComments)">
+                     ...
                             <div th:if="${childComment.childComments() != null}">
                                 <div th:if="!${childComment.childComments().isEmpty()}">
                                     <th:block
@@ -66,8 +69,7 @@ spring-security-web-6.0.3
                                 </div>
                             </div>
                      </th:block>
-
-
+</div>
 ```
 
 
