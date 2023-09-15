@@ -1,7 +1,6 @@
 # nestedCommentService
 
-*개발할 때 사고의 흐름등을 주석으로 자주 기록해놓는 편인데, 첫 깃허브사용이라 주석 삭제 및 사소한 수정으로 인해 쓸데없이 변경내용이 상당히 많이 잡혔다. 다음부턴 개선하도록 하자
-
+* 개발할 때 사고의 흐름등을 주석으로 자주 기록해놓는 편인만큼 첫 깃허브사용이라 주석 삭제 및 사소한 수정으로 인해 쓸데없이 변경내용이 상당히 많이 잡혔다. 다음부턴 개선하도록 하자
 
 
 # 사용기술
@@ -307,6 +306,57 @@ function getUpdateForm(num, commentId) {
 }
 ```
 
+위 javascript코드에서 활용햐는 controller 코드들
+```java
+***CommentController.java
+
+@PostMapping("/password-checker")
+    public ResponseEntity<String> passwordChecker(
+            @AuthenticationPrincipal UserAccountPrincipal principal,
+            @RequestBody String password
+    )
+    {
+        String passwordRemovedQuotes = password.substring(1, password.length()-1);
+        //이렇게 따옴표 없애는 과정을 안하려면? 디티오를 써라. 알아서 매핑해줄테니 (지금은 안함), 원노트 참고
+        if(principal.getPassword().equals("{noop}"+passwordRemovedQuotes)){
+            return ResponseEntity.ok("확인");
+        }
+        else{
+            return ResponseEntity.badRequest().body("일치하지 않는 비밀번호입니다. 입력하신 비밀번호: " + passwordRemovedQuotes);
+        }
+    }
+    
+
+    @PostMapping("/{commentId}/update")
+    //수정가능한 내용 : 콘텐트, 캐스캐이딩 여부 - form의 post로 들어옴
+    public String updateComment(
+            @AuthenticationPrincipal UserAccountPrincipal principal,
+            @PathVariable Long commentId,
+            @RequestParam String updatingContent,
+            @RequestParam(required = false) Boolean updatingIsAffected
+    ){
+        commentService.updateComment(commentId, updatingContent, updatingIsAffected);
+        return "redirect:/";
+    }
+```
+
+
+이후 실제 Update 기능은 JPA의 DirtyChecking을 활용하여 구현
+```java
+***CommentService.java
+
+public void updateComment(Long commentId, String content, Boolean isAffected) {
+        //Dirty checking을 활용하여, 엔티티를 가져오고 수정한다.
+        Comment comment = commentRepository.getReferenceById(commentId);
+        if (comment.getContent() != null) {
+            comment.setContent(content);
+        }
+        if (comment.getIsAffected() != null) {
+            comment.setIsAffected(isAffected);
+        }
+    }
+```
+
 ### 수정기능 구현하며 깨달은 점
 
 문제를 겪었던 점은
@@ -325,3 +375,68 @@ function getUpdateForm(num, commentId) {
 * 각 댓글이 렌더링 되는 쪽에 id를 부여해서 해결할 수 있었는데, 단순히 viewIsAffected와 viewContent에만 id를 붙여주는 것이 아닌, 숨겨졌던 updatingForm쪽에도 id를 붙여줘서 해결했어야했음. 위 js코드를 보면 변수들에 +commentId가 붙어있는데 해결 결과로써 나타난 코드이다.
 
 
+
+### 댓글 삭제하기
+
+댓글수정과는 살짝다르게 async, await를 활용하여 구현해봄
+
+```javascript
+async function deleteComment(commentId) {
+        try {
+            const enteredPassword = prompt("삭제하시겠습니까?\n\n비밀번호를 입력하세요.");
+            const deleteResponse = await fetch('/' + commentId + '/delete', {    
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(enteredPassword)
+            });
+            console.log("deleteResponse값을 판단하는 제어문을 탑니다");
+            if (deleteResponse.ok) {
+                console.log("deleteResponse값: ok");
+                location.reload(); //전제페이지를 리로드
+            } else {
+                const errorTextDeleting = await deleteResponse.text();
+                throw new Error(errorTextDeleting);
+            }
+            console.log("deleteResponse: " + deleteResponse.status);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+```
+
+
+```java
+@PostMapping("/{commentId}/delete")
+    public ResponseEntity<String> deleteComment(
+            @PathVariable String commentId,
+            @AuthenticationPrincipal UserAccountPrincipal principal,
+            @RequestBody String password
+    ) {
+        log.info(commentId);
+        String passwordRemovedQuotes = password.substring(1, password.length()-1);
+        if (principal.getPassword().equals("{noop}"+passwordRemovedQuotes)) {   //비교시에 SpringSecurity암호화로 인해 붙이는 {noop}까지 포함하여 비교하여야한다.
+            commentService.deleteComment(Long.parseLong(commentId));
+            return ResponseEntity.ok("댓글이 삭제되었습니다 commentId: "+Long.parseLong(commentId));
+        } else {
+            return ResponseEntity.badRequest().body("일치하지 않는 비밀번호입니다. from 컨트롤러");
+        }
+    }
+```
+
+* cascade옵션으로 인한 삭제를 위해 순회하며 삭제할 원소들을 삭제
+```java
+public void deleteComment(Long commentId) {
+        //아이디로 객체를 가져와서 자식을 가져오고 자식set을 순회하며 해당엔티티의 삭제여부를 결정
+        Comment targetComment = commentRepository.findById(commentId).get();
+        targetComment.getChildComments().stream().forEach(comment -> {
+                    if (comment.getIsAffected() == true) {
+                        commentRepository.deleteById(comment.getId());
+                    }
+                }
+        );
+        commentRepository.deleteById(commentId);
+
+    }
+```
