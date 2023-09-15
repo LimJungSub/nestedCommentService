@@ -41,7 +41,7 @@ spring-security-web-6.0.3
 
 ## 무한대댓글 출력구조
 
-### 출력구조와 정렬
+### 출력구조
 
 이중루프를 통해 구현하였다.
 
@@ -53,7 +53,7 @@ spring-security-web-6.0.3
 
 전체적인 구조는 아래와 같다.
 
-```
+```html
 <div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-1">
 ...
                     <div th:if="!${comment.childComments().isEmpty()}">
@@ -71,6 +71,31 @@ spring-security-web-6.0.3
                      </th:block>
 </div>
 ```
+
+###정렬
+
+우선 컨트롤러에서 뷰쪽으로 넘겨주는 commentList에는 루트댓글들만 넘겨준다. 과정에서 @PageableDefault 어노테이션을 사용하여 루트댓글들을 어떤식으로 받아올지 지정했다.
+
+루트댓글들만 넘겨주어도 계층형식으로 대댓글들이 연결되어있기때문에 괜찮다.
+
+```java
+@GetMapping("/")
+    public String comments(
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
+            ModelMap modelMap
+    )
+    {
+        //서비스에서 다 dto로 바꿔서 컨트롤러에게 줌Root
+        Page<CommentDto> list = commentService.getRootComments(pageable);
+        List<Integer> paginationBar = paginationBarService.returnNavList(pageable.getPageNumber(), pageable.getPageSize());
+        modelMap.addAttribute("paginationBar",paginationBar);
+        modelMap.addAttribute("commentList",list);
+        //대댓글은 정렬방법이 다르기때문에 별도의 대댓글들을 컨트롤러계층이전에서 정렬하여 내려준다.
+        return "/index";
+    }
+```
+
+어려웠던 부분은, 대댓글이냐 댓글이냐에 따라 정렬기준을 다르게 적용했단 점이었다.
 
 
 
