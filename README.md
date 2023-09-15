@@ -325,14 +325,3 @@ function getUpdateForm(num, commentId) {
 * 각 댓글이 렌더링 되는 쪽에 id를 부여해서 해결할 수 있었는데, 단순히 viewIsAffected와 viewContent에만 id를 붙여주는 것이 아닌, 숨겨졌던 updatingForm쪽에도 id를 붙여줘서 해결했어야했음. 위 js코드를 보면 변수들에 +commentId가 붙어있는데 해결 결과로써 나타난 코드이다.
 
 
-### 댓글 삭제하기
-
-
-
-
-## jpa
-## springsecurity
-
-## 수정기능구현:javascript fetch, await
-
-## 타임리프
