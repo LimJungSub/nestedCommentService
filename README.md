@@ -113,8 +113,45 @@ spring-security-web-6.0.3
 
 대댓글은 정렬방법이 오름차순이다. 컨트롤러계층이전에서 대댓글들을 오름차순으로 정렬하여 루트댓글의 Set<CommentDto> childComments에 저장하였다.
 
+서비스계층에서 루트댓글들에 .toDto()를 통해 Dto형식으로 변환할 때, 자식댓글을 오름차순 정렬하여 갖고있게 하며,
 
+자식댓글의 자식댓글들 (즉 N차대댓글들)도 정렬하여 갖고 있게한다.
 
+여기서 중요한점은 화면 출력 시 정렬은 db에 저장되어있는 객체들의 정렬방식을 따르지 않기때문에, 별도로 이렇게 한번 더 DTO차원에서 정렬을 해준 것이다. (개발하며 이 부분을 몰라 상당히 많은 시간이 소요됐었다)
+
+```java
+***CommentDto.java (record)
+
+public static CommentDto toDto(Comment comment){
+        //대댓글정렬
+        Comparator<CommentDto> comparator = Comparator.comparing(CommentDto::createdDate).thenComparingLong(CommentDto::id);
+
+        //직계자식을 담은 Set 설정
+        Set<CommentDto> childSet = comment.getChildComments().stream().map(
+                        c-> { 
+                            //대댓글의 댓글(N차대댓글)들도 대댓글과 정렬로직이 똑같기떄문에(등록순), 똑같은 comparator 적용
+                            Set<CommentDto> tmpSet = c.getChildComments().stream().map(CommentDto::toDto).collect(Collectors.toSet());
+                            TreeSet<CommentDto> childTreeSet = new TreeSet<>(comparator);
+                            childTreeSet.addAll(tmpSet);
+                            return CommentDto.of(
+                                    c.getId(), c.getContent(), c.getIsAffected(), c.getUser().getUserId(), c.getUser().getNickname(), c.getParentId(), c.getParentComment_Writer(),
+                                    //자식코멘트의 자식코멘트들도 대댓글에 속하므로 대댓글과 같은 정렬로직을 적용
+                                    childTreeSet,
+                                    c.getCreatedDate(), c.getModifiedDate(), c.getCreatedBy()
+                            );
+                        }).collect(Collectors.toSet());  //Set<CommentDto>
+
+        //초기값셋과 정렬기준(컴페레이터)를 한꺼번에 넘겨주고 싶으나 그런메서드는 없으므로 우선 정렬기준 설정 후 addAll 사용
+        TreeSet<CommentDto> treeSet = new TreeSet<>(comparator);
+        treeSet.addAll(childSet);
+
+        return new CommentDto(
+                comment.getId(), comment.getContent(), comment.getIsAffected(), comment.getUser().getUserId(), comment.getUser().getNickname() , comment.getParentId(), comment.getParentComment_Writer(),
+                treeSet, comment.getCreatedDate(), comment.getModifiedDate(),
+                comment.getCreatedBy()
+        );
+    }
+```
 
 ### 대댓글 출력구조-데이터는 어떻게 전송했는가
 organizechilds
