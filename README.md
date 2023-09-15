@@ -1,7 +1,5 @@
 # nestedCommentService
 
-*사실 댓글이라기 보다는 토막글 개념으로 간단히 소통히 가능한 게시판기능이다.
-
 *개발할 때 사고의 흐름등을 주석으로 자주 기록해놓는 편인데, 첫 깃허브사용이라 주석 삭제 및 사소한 수정으로 인해 쓸데없이 변경내용이 상당히 많이 잡혔다. 다음부턴 개선하도록 하자
 
 
@@ -222,6 +220,9 @@ public void saveComment(String content, Optional<Boolean> isAffected, String use
         }
     }
 ```
+
+*추가기능 - 부모댓글의 작성자를 표시함으로써 가시성 향상
+![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/4d9a88d3-b16b-4614-baa7-16465b70f911)
 
 
 
