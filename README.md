@@ -21,6 +21,7 @@ mysql 8.0.33
 
 spring-security-web-6.0.3
 
+javascript fetch api
 
 
 # 핵심 기술 구현
