@@ -36,7 +36,7 @@ javascript fetch api
 
 값이 False면 부모댓글이 삭제되더라도 대댓글은 자동으로 남아있다.
 
-댓글 수정 시에도 댓글 작성자가 해당 옵션을 변경할 수 있게 허용했다.
+대댓글 수정 시에도 대댓글 작성자가 해당 옵션을 변경할 수 있게 허용했다.
  ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/02b210ac-eca2-4189-b981-ce13e4770ab5)
 
 
