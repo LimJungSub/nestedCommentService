@@ -1,5 +1,7 @@
 # nestedCommentService
 
+*사실 댓글이라기 보다는 토막글 개념으로 간단히 소통히 가능한 게시판기능이다.
+
 *개발할 때 사고의 흐름등을 주석으로 자주 기록해놓는 편인데, 첫 깃허브사용이라 주석 삭제 및 사소한 수정으로 인해 쓸데없이 변경내용이 상당히 많이 잡혔다. 다음부턴 개선하도록 하자
 
 
@@ -27,18 +29,52 @@ spring-security-web-6.0.3
 
 엔티티의 Boolean isAffected 필드를 통해 구현하였다.
 
-
 대댓글들만 이 값을 설정하고, 부모댓글이 없는 루트댓글들은 이 값을 설정하지 않는다.(null로 설정한다)
-
 
 값이 True면 부모댓글이 삭제될 시 대댓글도 자동으로 삭제된다.
 
-
 값이 False면 부모댓글이 삭제되더라도 대댓글은 자동으로 남아있다.
-
 
 댓글 수정 시에도 댓글 작성자가 해당 옵션을 변경할 수 있게 허용했다.
  ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/02b210ac-eca2-4189-b981-ce13e4770ab5)
+
+
+## 무한대댓글 출력구조
+
+### 출력구조와 정렬
+
+이중루프를 통해 구현하였다.
+
+우선 1차적으로 루트댓글들을 순회하며 출력하고, 해당 댓글에 자식댓글이 있다면 또 순회하며 자식댓글을 출력한다.
+
+자식댓글을 출력하며 마지막에 한번 더 자식댓글에 자식댓글이 있는지 검사하고,
+
+있다면 Thymeleaf의 fragment와 replace기능으로 재귀호출을 통해 구현하였다. 
+
+전체적인 구조는 아래와 같다.
+
+```
+<div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-1">
+                    <div th:if="!${comment.childComments().isEmpty()}">
+                        <th:block th:replace="::grandComment(${comment.childComments()})"></th:block>
+                    </div>
+                     <th:block th:fragment="grandComment(childComments)">
+                            <div th:if="${childComment.childComments() != null}">
+                                <div th:if="!${childComment.childComments().isEmpty()}">
+                                    <th:block
+                                            th:replace="::grandComment(${childComment.childComments()})"></th:block>
+                                </div>
+                            </div>
+                     </th:block>
+
+
+```
+
+
+
+### 대댓글 출력구조-데이터는 어떻게 전송했는가
+organizechilds
++기존구조의 문제점
 
 
 ## 대댓글 작성
@@ -46,11 +82,7 @@ spring-security-web-6.0.3
 -하나의 API를 통해 루트댓글저장과 대댓글저장을 한번에 처리
 
 
-## 대댓글 출력구조
-## 대댓글 출력구조-뷰(타임리프)
-## 대댓글 출력구조-데이터는 어떻게 전송했는가
-organizechilds
-+기존구조의 문제점
+
 
 ## jpa
 ## springsecurity
