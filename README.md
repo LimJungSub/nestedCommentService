@@ -235,7 +235,10 @@ public void saveComment(String content, Optional<Boolean> isAffected, String use
 
 ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/a740a1c9-ac27-4ced-ac12-7cfe04bb1152)
 
-비밀번호 일치 시 response.ok 반환받음, 아래와 같이 기존 내용 폼에 그대로 담아 출력하여 기존내용을 바탕으로 수정할 수 있게함. JavaScript의 fetch API를 통해 구현함.
+JavaScript의 fetch API를 통해 구현함.
+
+비밀번호 일치 시 response.ok 반환받음, 아래와 같이 기존 내용 폼에 그대로 담아 출력하여 기존내용을 바탕으로 수정할 수 있게함. 
+
 수정폼이 숨겨져있다가 나타나는 방식(자바스크립트를 통한 hidden속성 해제)으로 구현함. 
 ![image](https://github.com/LimJungSub/nestedCommentService/assets/80201699/564e3db0-e80f-44c6-b5ce-3dd1d35108a8)
 
