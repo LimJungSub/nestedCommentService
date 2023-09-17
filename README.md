@@ -426,7 +426,7 @@ async function deleteComment(commentId) {
     }
 ```
 
-* cascade옵션으로 인한 삭제를 위해 순회하며 삭제할 원소들을 삭제
+* 아래는 cascade옵션이 설정되어 있는 대댓글들을 삭제하기 위한 코드이다. 
 ```java
 public void deleteComment(Long commentId) {
         //아이디로 객체를 가져와서 자식을 가져오고 자식set을 순회하며 해당엔티티의 삭제여부를 결정
