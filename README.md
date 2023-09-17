@@ -46,7 +46,7 @@ javascript fetch api
 
 이중루프를 통해 구현하였다.
 
-우선 1차적으로 루트댓글들을 순회하며 출력하고, 해당 댓글에 자식댓글이 있다면 또 순회하며 자식댓글을 출력한다.
+우선 1차적으로 루트댓글들을 순회하며 출력하고, 해당 루프안에서 현재 댓글에 자식댓글이 있다면 또 순회하며 자식댓글을 출력한다.
 
 자식댓글을 출력하며 마지막에 한번 더 자식댓글에 자식댓글이 있는지 검사하고,
 
@@ -58,11 +58,10 @@ javascript fetch api
 *** index.html
 
 <div th:if="!${commentList.isEmpty()}" th:each="comment:${commentList}" class="d-flex mb-1">
-                    ...
-                    <div th:if="!${comment.childComments().isEmpty()}">
+                     ...댓글출력부분
+                     <div th:if="!${comment.childComments().isEmpty()}">
                         <th:block th:replace="::grandComment(${comment.childComments()})"></th:block>
-                    </div>
-                    ...
+                     </div>
                      <th:block th:fragment="grandComment(childComments)">
                      ...
                             <div th:if="${childComment.childComments() != null}">
