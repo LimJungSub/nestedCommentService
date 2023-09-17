@@ -360,11 +360,11 @@ public void updateComment(Long commentId, String content, Boolean isAffected) {
 
 ### 수정기능 구현하며 깨달은 점
 
-문제를 겪었던 점은
+기능을 구현하며 문제를 겪었던 점은
 
-* 문제1 : 내용못가져옴
+* 문제1 : 기존 댓글의 내용 못가져옴
 
-* 문제2:  수정폼뜨는위치가 맞지않음
+* 문제2:  수정폼뜨는위치가 맞지 않음
 
 사진으로보면 아래와 같았다.
 
